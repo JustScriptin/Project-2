@@ -10,6 +10,7 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const app = express();
 const db = mongoose.connection;
+const Books = require("./models/bookData.js");
 const show = console.log;
 show("im cool");
 //___________________
@@ -50,6 +51,81 @@ app.use(methodOverride("_method")); // allow POST, PUT and DELETE from a form
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+// =============================================
+//
+//              * RESTFUL ROUTES *
+//       "Representational State Transfer"
+//
+// =============================================
+
+/*                      THE BIG 5 REQUESTS
+• GET ==> the user asks for information from a server
+• POST ==> sending data to a server
+• PUT ==> sending data to a server with the intention of changing (but really more like replacing) something that already exists
+• DELETE ==> request to remove data from a server
+• PATCH ==> you want to make a small change (misspelling, inventory #, or similar) to something that already exists (as opposed to PUT, that technically replaces the object)
+*/
+
+/*                        I.N.D.U.C.E.S.
+    INDEX  |  NEW  |  DESTROY  |  UPDATE  | CREATE |  EDIT  |  SHOW  |
+*/
+
+// INDEX | GET Request | Presentational Route | ==> Display a list of all orders
+app.get("/books", (req, res) => {
+  Books.find({}, (err, allBooks) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.render("Index", {
+        books: allBooks,
+
+        // *** ANY OTHER INFO WE NEED TO PASS AS PROPS?
+      });
+    }
+  });
+});
+// *** COME BACK AND CREATE A 404 that we pass as our ERR
+
+// NEW | GET Request | Presentational Route | ==> Return an HTML form for creating a new order
+app.get("/books/new", (req, res) => {
+  res.render("New");
+});
+
+// DESTROY | DELETE Request | Functional Route | ==> Delete a specific order
+// "/<nameOfResource>/:id"
+
+// UPDATE | PUT Request | Functional Route | ==> Update a specific order
+// "/<nameOfResource>/:id"
+
+// CREATE | POST Request | Functional Route | ==> Create a new order
+app.post("/books", (req, res) => {
+  Books.create(req.body, (err, createdBook) => {
+    err ? res.send(err) : res.redirect("/books");
+
+    // *** COME BACK AND CREATE A 404 that we pass as our ERR
+
+    console.log(createdBook);
+  });
+});
+
+// EDIT | GET Request | Presentational Route | ==> Return an HTML form for editing an order
+// "/<nameOfResource>/:id/edit"
+
+// SHOW | GET Request | Presentational Route | ==> Display a specific order
+// "/<nameOfResource>/:id"
+app.get("/books/:id", (req, res) => {
+  Books.findById(req.params.id, (err, foundBook) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.render("Show", {
+        book: foundBook,
+      });
+    }
+  });
+});
+
 //___________________
 //Listener
 //___________________
